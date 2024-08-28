@@ -156,16 +156,17 @@ class SessionStateManager:
 # Decorator for UI actions
 def validate_input(func):
     def wrapper(*args, **kwargs):
-        try:
-            ui_instance = args[0]
-            if not ui_instance.topic:
-                st.warning("Please enter a topic for the blog.")
-                return None
-            return func(*args, **kwargs)
-        except Exception as e:
-            logger.error("Error in input validation: %s", e)
-            st.error("Input validation failed.")
-            raise BlogError("Input validation failed") from e
+        ui_instance = args[0]
+        if not ui_instance.topic:
+            st.warning("Please enter a topic for the blog.")
+            return None
+        if not ui_instance.audience:
+            st.warning("Please select an audience for the blog.")
+            return None
+        if ui_instance.num_words < 50 or ui_instance.num_words > 5000:
+            st.warning("Number of words must be between 50 and 5000.")
+            return None
+        return func(*args, **kwargs)
     return wrapper
 
 # Streamlit UI Class with Asynchronous Capabilities
