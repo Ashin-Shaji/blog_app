@@ -25,7 +25,7 @@ class BlogError(Exception):
     pass
 
 # Metaclass for Singleton Pattern
-class SingletonMeta(metaclass=type):
+class SingletonMeta(type):
     _instances: Dict[Type, Any] = {}
 
     def __call__(cls, *args, **kwargs):
@@ -163,7 +163,7 @@ class SessionStateManager:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_type:
-            logger.error("Exception occurred in session state management: %s", exc_val)
+            logger.error(f"Exception occurred in session state management: {exc_val}")
 
 # Decorator for UI actions
 def validate_input(func):
@@ -242,11 +242,11 @@ class BlogGeneratorUI:
         except ValueError as ve:
             error_message = f"Render error: {ve}"
             logger.error(error_message)
-            st.error(error_message)
+            st.error("Rendering failed due to invalid input.")
         except Exception as e:
             error_message = f"Unexpected error during render: {e}"
             logger.error(error_message)
-            st.error(error_message)
+            st.error("An unexpected error occurred during rendering.")
             raise BlogError(error_message) from e
 
     @validate_input
@@ -256,29 +256,26 @@ class BlogGeneratorUI:
             self.blog_content = await blog_generator.generate()
             st.session_state.blog_content = self.blog_content
         except BlogError as be:
-            logger.error("Blog generation error: %s", be)
-            st.error(str(be))
+            error_message = f"Blog generation error: {be}"
+            logger.error(error_message)
+            st.error("Failed to generate the blog content.")
         except Exception as e:
             error_message = f"Unexpected error during blog generation: {e}"
             logger.error(error_message)
-            st.error(error_message)
+            st.error("An unexpected error occurred during blog generation.")
             raise BlogError(error_message) from e
 
-# Main Function
-def main():
+# Main Execution Block
+if __name__ == "__main__":
     try:
         config = Config()
-        blog_ui = BlogGeneratorUI(config)
-        blog_ui.render()
+        ui = BlogGeneratorUI(config=config)
+        ui.render()
     except ValidationError as ve:
-        error_message = f"Configuration validation error: {ve}"
-        logger.error(error_message)
-        st.error(error_message)
+        st.error(f"Configuration validation error: {ve}")
+        logger.error(f"Configuration validation error: {ve}")
     except Exception as e:
-        error_message = f"Unexpected error in main: {e}"
-        logger.error(error_message)
+        error_message = f"Critical error in application: {e}"
         st.error(error_message)
+        logger.error(error_message)
         raise BlogError(error_message) from e
-
-if __name__ == "__main__":
-    main()
