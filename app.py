@@ -157,15 +157,22 @@ class SessionStateManager:
 def validate_input(func):
     def wrapper(*args, **kwargs):
         ui_instance = args[0]
+
+        # Check if topic is provided
         if not ui_instance.topic:
             st.warning("Please enter a topic for the blog.")
             return None
+        
+        # Check if audience is selected
         if not ui_instance.audience:
             st.warning("Please select an audience for the blog.")
             return None
+        
+        # Check if number of words is within the valid range
         if ui_instance.num_words < 50 or ui_instance.num_words > 5000:
             st.warning("Number of words must be between 50 and 5000.")
             return None
+
         return func(*args, **kwargs)
     return wrapper
 
@@ -190,9 +197,23 @@ class BlogGeneratorUI:
             col1, col2 = st.columns([5, 5])
 
             with col1:
-                self.num_words = st.number_input("Number of words for the blog:", min_value=50, max_value=5000, step=50, value=300)
+                # Strictly enforce the number of words input
+                self.num_words = st.number_input(
+                    "Number of words for the blog:", 
+                    min_value=50, 
+                    max_value=5000, 
+                    step=50, 
+                    value=300
+                )
             with col2:
-                self.audience = st.selectbox("Blog writing for whom?", ["Common People", "Researchers", "Data Scientists"])
+                # Audience selection
+                self.audience = st.selectbox(
+                    "Blog writing for whom?", 
+                    ["Select...", "Common People", "Researchers", "Data Scientists"]
+                )
+                # Make sure "Select..." doesn't count as valid selection
+                if self.audience == "Select...":
+                    self.audience = ""
 
             with SessionStateManager("blog_content", "") as content:
                 self.blog_content = content
@@ -235,14 +256,11 @@ def main():
         blog_ui.render()
     except ValidationError as ve:
         logger.error("Configuration validation error: %s", ve)
-        st.error("Configuration is invalid. Please check your settings.")
-    except BlogError as be:
-        logger.error("Application error: %s", be)
-        st.error("The application encountered an error.")
+        st.error("Configuration validation failed.")
     except Exception as e:
         logger.error("Unexpected error in main: %s", e)
         st.error("An unexpected error occurred.")
-        raise
+        raise BlogError("Application failed to run") from e
 
 if __name__ == "__main__":
     main()
