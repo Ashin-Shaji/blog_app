@@ -83,8 +83,8 @@ class BlogGenerator:
     @num_words.setter
     def num_words(self, value: int) -> None:
         try:
-            if value < 50 or value > 5000:
-                raise ValueError("Number of words must be between 50 and 5000")
+            if value < 50 or value > 2000:
+                raise ValueError("Number of words must be between 50 and 2000")
             self._num_words = value
         except ValueError as ve:
             logger.error("Invalid number of words: %s", ve)
@@ -189,7 +189,7 @@ class BlogGeneratorUI:
             col1, col2 = st.columns([5, 5])
 
             with col1:
-                self.num_words = st.number_input("Number of words for the blog:", min_value=50, max_value=5000, step=50, value=300)
+                self.num_words = st.slider("Number of words for the blog:", min_value=50, max_value=2000, step=50, value=300)
             with col2:
                 self.audience = st.selectbox("Blog writing for whom?", ["Common People", "Researchers", "Data Scientists"])
 
