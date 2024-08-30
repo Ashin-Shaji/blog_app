@@ -5,7 +5,8 @@ from pydantic import BaseModel, Field, ValidationError
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.prompts import PromptTemplate
 
-os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+os.environ["GOOGLE_API_KEY"] = 'AIzaSyB2fb5UXRhCToKettFZ2VM4HlJhzOVvXz0'
+#st.secrets["GOOGLE_API_KEY"]
 
 # Configuration Class
 class Config(BaseModel):
